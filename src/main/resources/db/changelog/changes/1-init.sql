@@ -3,8 +3,7 @@ create table subscriptions
     id                  uuid primary key,
     username            text unique nulls not distinct,
     user_full_name      text,
-    is_active           boolean,
-    subscription_date   timestamp
+    is_active           boolean
 );
 
 create table books
@@ -12,6 +11,7 @@ create table books
     id                  uuid primary key,
     author              text,
     title               text,
+    publication_date    timestamp,
     subscription_id     uuid references subscriptions (id)
 );
 

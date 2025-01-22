@@ -9,6 +9,6 @@ import java.util.UUID;
 
 @Repository
 public interface SubscriptionRepository extends JpaRepository<Subscription, UUID> {
-    Subscription findSubscriptionByUserFullName(String userFullName);
+    Optional<Subscription> findSubscriptionByUserFullName(String userFullName);
     Optional<Subscription> findSubscriptionByUsernameAndUserFullName(String username, String userFullName);
 }

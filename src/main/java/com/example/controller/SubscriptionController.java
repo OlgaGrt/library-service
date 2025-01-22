@@ -3,6 +3,7 @@ package com.example.controller;
 import com.example.dto.SubscriptionResponseDto;
 import com.example.service.SubscriptionService;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,13 +23,12 @@ public class SubscriptionController {
     private final SubscriptionService subscriptionService;
 
     @GetMapping("/{userFullName}")
-    public SubscriptionResponseDto getText(@PathVariable(name = "userFullName") String userFullName) {
-        return subscriptionService.getSubscription(userFullName);
+    public ResponseEntity<SubscriptionResponseDto> getText(@PathVariable(name = "userFullName") String userFullName) {
+        return new ResponseEntity<>(subscriptionService.getSubscription(userFullName), HttpStatus.OK);
     }
 
     @PostMapping(path = "/upload", consumes = "multipart/form-data")
     public ResponseEntity<String> uploadSubscriptions(@RequestParam("file") MultipartFile file) throws IOException {
-        subscriptionService.parseFileWithSucription(file);
-        return ResponseEntity.ok("file parsed");
+        return ResponseEntity.ok(subscriptionService.processFile(file));
     }
 }

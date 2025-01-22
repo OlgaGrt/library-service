@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "array",
+  "items": [
+    {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string"
+        },
+        "bookAuthor": {
+          "type": "string"
+        },
+        "bookName": {
+          "type": "string"
+        },
+        "userFullName": {
+          "type": "string"
+        },
+        "userActive": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "username",
+        "bookAuthor",
+        "bookName",
+        "userFullName",
+        "userActive"
+      ]
+    }
+  ]
+}

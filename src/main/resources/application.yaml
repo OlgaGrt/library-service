@@ -18,7 +18,7 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: testolgatesttest@gmail.com
-    password: vnsjfmqlncvbwgmb
+    password:
     properties:
       mail:
         smtp:
@@ -29,5 +29,11 @@ spring:
   liquibase:
     change-log: "classpath:db/changelog/changelog-master.yml"
 
+  batch:
+    jdbc:
+      initialize-schema: always
+    job:
+      enabled: false
+
 notification:
-  schedule: 1 * * * * *
+  schedule: 0 0 0 * * *

@@ -1,15 +1,15 @@
 package com.example.service;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
+@AllArgsConstructor
 public class EmailService {
-
-    private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
 
     private JavaMailSender emailSender;
 
@@ -19,7 +19,7 @@ public class EmailService {
         message.setSubject("Library notification");
         message.setText(text);
 
-        logger.info("Sending email to:{} message:{}", message.getTo(), message.getText());
+        log.info("Sending email to:{} message:{}", message.getTo(), message.getText());
         emailSender.send(message);
     }
 

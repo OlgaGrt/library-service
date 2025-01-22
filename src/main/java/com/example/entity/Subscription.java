@@ -1,5 +1,6 @@
 package com.example.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
@@ -26,7 +27,7 @@ public class Subscription {
     private String userFullName;
     private boolean isActive;
 
-    @OneToMany(mappedBy = "subscription", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "subscription", fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<Book> subscribedBooks;
 
     public Subscription(String username, String userFullName, boolean isActive) {
