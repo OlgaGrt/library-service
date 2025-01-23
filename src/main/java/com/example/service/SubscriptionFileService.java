@@ -1,5 +1,6 @@
 package com.example.service;
 
+import com.example.exception.JsonValidationException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.networknt.schema.JsonSchema;
 import com.networknt.schema.ValidationMessage;
@@ -10,42 +11,50 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @AllArgsConstructor
 public class SubscriptionFileService {
-    public static final String TMP_DIR = System.getProperty("java.io.tmpdir");
 
-    private JsonSchema subscriptionUploadDtoJsonSchema;
     private ObjectMapper objectMapper;
 
-    public void validateFile(MultipartFile multipartFile) {
+    public void validateFile(MultipartFile multipartFile, JsonSchema validationSchema) {
         if (multipartFile.isEmpty()) {
-            throw new IllegalArgumentException("File is empty");
+            throw new IllegalArgumentException(String.format("File {%s} is empty", multipartFile.getName()));
         }
 
         try {
             var jsonNodeToValidate = objectMapper.readTree(multipartFile.getBytes());
-            var errors = subscriptionUploadDtoJsonSchema.validate(jsonNodeToValidate);
+            var errors = validationSchema.validate(jsonNodeToValidate);
+
             if (!errors.isEmpty()) {
                 var errorMessages = errors.stream()
                         .map(ValidationMessage::getMessage)
                         .collect(Collectors.joining(", "));
 
-                log.info("file: {} contains validations errors: {}", multipartFile.getOriginalFilename(), errorMessages);
+                log.info("File: {} contains validation errors: {}", multipartFile.getOriginalFilename(), errorMessages);
 
-                throw new RuntimeException("Json file validation errors: " + errorMessages);
+                throw new JsonValidationException("Json file validation errors: " + errorMessages);
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            log.error("Error while validating file {}: {}", multipartFile.getName(), e.getMessage(), e);
+            throw new RuntimeException("Error while validating file", e);
         }
     }
 
-    public File safeFile(MultipartFile multipartFile) {
+    public File safeFile(MultipartFile multipartFile, String directory) {
+        if (!Files.exists(Path.of(directory))) {
+            var errorMessage = "Directory does not exist: " + directory;
+            log.error(errorMessage);
+            throw new IllegalArgumentException(errorMessage);
+        }
+
         try {
-            var savedFile = new File(TMP_DIR + multipartFile.getOriginalFilename());
+            var savedFile = new File(directory + multipartFile.getName());
             multipartFile.transferTo(savedFile);
 
             log.info("File saved to: {}", savedFile.getAbsolutePath());
