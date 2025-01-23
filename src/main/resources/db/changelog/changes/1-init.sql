@@ -15,6 +15,9 @@ create table books
     subscription_id     uuid references subscriptions (id)
 );
 
+create index idx_books_subscription_id on books (subscription_id);
+
+
 create table shedlock (
                           name varchar(64),
                           lock_until timestamp(3) NULL,

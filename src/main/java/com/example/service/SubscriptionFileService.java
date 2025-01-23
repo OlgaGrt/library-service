@@ -10,7 +10,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -22,37 +21,39 @@ public class SubscriptionFileService {
     private JsonSchema subscriptionUploadDtoJsonSchema;
     private ObjectMapper objectMapper;
 
-    public File validateAndSafeFile(MultipartFile multipartFile) {
+    public void validateFile(MultipartFile multipartFile) {
         if (multipartFile.isEmpty()) {
             throw new IllegalArgumentException("File is empty");
         }
+
+        try {
+            var jsonNodeToValidate = objectMapper.readTree(multipartFile.getBytes());
+            var errors = subscriptionUploadDtoJsonSchema.validate(jsonNodeToValidate);
+            if (!errors.isEmpty()) {
+                var errorMessages = errors.stream()
+                        .map(ValidationMessage::getMessage)
+                        .collect(Collectors.joining(", "));
+
+                log.info("file: {} contains validations errors: {}", multipartFile.getOriginalFilename(), errorMessages);
+
+                throw new RuntimeException("Json file validation errors: " + errorMessages);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public File safeFile(MultipartFile multipartFile) {
         try {
             var savedFile = new File(TMP_DIR + multipartFile.getOriginalFilename());
             multipartFile.transferTo(savedFile);
-            log.info("File saved to: {}", savedFile.getAbsolutePath());
 
-            validateJsonFileStructure(savedFile);
+            log.info("File saved to: {}", savedFile.getAbsolutePath());
 
             return savedFile;
         } catch (IOException e) {
             log.error(e.getMessage());
             throw new RuntimeException("Failed to save file", e);
-        }
-    }
-
-    public void validateJsonFileStructure(File jsonFile) throws IOException {
-        if (!jsonFile.exists()) {
-            throw new IOException("File " + jsonFile + " does not exist");
-        }
-
-        var jsonNodeToValidate = objectMapper.readTree(jsonFile);
-        
-        var errors = subscriptionUploadDtoJsonSchema.validate(jsonNodeToValidate);
-        if (!errors.isEmpty()) {
-            var errorMessages = errors.stream()
-                    .map(ValidationMessage::getMessage) 
-                    .collect(Collectors.joining(", "));
-            throw new RuntimeException("Json file validation errors: " + errorMessages);
         }
     }
 
