@@ -60,12 +60,13 @@ public class BatchConfiguration {
                 new JacksonJsonObjectReader<>(SubscriptionUploadDto.class));
     }
 
-    @Bean
-    public Executor taskExecutor() {
+    @Bean("batchTaskExecutor")
+    public Executor batchTaskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(1);
         executor.setMaxPoolSize(20);
         executor.setQueueCapacity(100);
+        executor.setThreadNamePrefix("batch-");
         executor.initialize();
         return executor;
     }

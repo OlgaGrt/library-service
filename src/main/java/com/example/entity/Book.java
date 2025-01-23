@@ -26,7 +26,7 @@ public class Book {
     private String author;
     private LocalDate publicationDate;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.ALL)
     private Subscription subscription;
 
     public Book(String title, String author) {
